@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const knex = require('../db/knex');
 const mysql = require('mysql');
 
 const connection = mysql.createConnection({
@@ -18,29 +19,46 @@ connection.connect((err) => {
 });
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  connection.query(
-    'select * from tasks;',
-    (error, results) => {
-      console.log(error);
-      console.log(results);
-      res.render('index.ejs', {
-        title: 'Unko Taberu',
-        todos: results  
-      })
-    }
-  );
+router.get('/', function (req, res, next) {
+  const userId = req.session.userid;
+  const isAuth = !!userId;
+  knex("tasks")
+    .select("*")
+    .then(function (results) {
+      res.render('index', {
+        title: 'ToDo App',
+        todos: results,
+        isAuth: isAuth,
+      });
+    })
+    .catch(function (err) {
+      console.error(err);
+      res.render('index', {
+        title: 'ToDo App',
+        isAuth: isAuth,
+      });
+    });
 });
 
 router.post('/', function(req, res, next) {
   const todo = req.body.add;
-  connection.query(
-  'insert into tasks (user_id, content) values (?, ?);',
-  [1, todo],
-  (error, results) => {
-    console.log(error);
-  })
-  res.redirect('/');
+  const userId = req.session.userid;
+  const isAuth = Boolean(userId);
+  knex('tasks')
+    .insert({ user_id: userId, content: todo })
+    .then(function () {
+      res.redirect('/');
+    })
+    .catch(function (err) {
+      consle.error(err);
+      res.render('index.ejs', {
+        title: 'Unko Tabeta' 
+      });
+    });
 });
+
+router.use('/signup', require('./signup'));
+router.use('/signin', require('./signin'));
+router.use('/logout', require('./logout'));
 
 module.exports = router;
