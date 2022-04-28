@@ -9,6 +9,9 @@
     <link rel="stylesheet" type="text/css" href="/css/main.css">
   </head>
   <body>
+    <% errors.forEach(error => { %>
+      <li><%= error %></li>
+    <% }) %>
     <form action="/", method="post">
       <label for="text">Todo</label>
       <input type="text" name="content" id="text" />
