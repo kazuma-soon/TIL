@@ -1,0 +1,22 @@
+<DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <form action="/" method="post">
+      <label>Add Todos</label>
+      <input required type="text" name="add" placeholder="What to do?">
+      <input type="submit" value="Add!">
+    </form>
+
+    <% todos.forEach(todo => { %>
+      <ul>
+        <li><%= todo.content %></li>
+      </ul>
+    <% }) %>
+  </body>
+</html>
+
+
