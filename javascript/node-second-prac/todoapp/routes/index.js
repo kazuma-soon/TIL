@@ -13,18 +13,27 @@ client.connect()
 
 /* GET home page. */
 router.get('/', (req, res, next) => {
-  const isAuth = Boolean(req.session.userid);
-  console.log(isAuth);
-  client
-    .query('SELECT * FROM tasks')
-    .then(results => {
-      res.render('index.ejs', { 
-	title: 'Unko Zamurai',
-	todos: results.rows,
-        isAuth: isAuth,
+  const isAuth = req.isAuthenticated()
+  
+  if (isAuth) {
+    const userId = req.user.id;
+    client
+      .query('SELECT * FROM tasks WHERE user_id = $1', [userId])
+      .then(results => {
+        res.render('index.ejs', { 
+          title: 'Unko Zamurai',
+          todos: results.rows,
+          isAuth: isAuth,
+        })
       })
+      .catch(error => console.error(error.stack))
+  }
+  else {
+    res.render('index', {
+      title: 'ToDo App',
+      isAuth: isAuth,
     })
-    .catch(error => console.error(error.stack))
+  }
 });
 
 router.post('/', (req, res, next) => {
@@ -33,7 +42,7 @@ router.post('/', (req, res, next) => {
   })
 
   const todo = req.body.add;
-  const userId = req.session.userid;
+  const userId = req.user.id;
   client
   .query('INSERT INTO tasks (user_id, content) VALUES ($1, $2)', [userId, todo])
   .then(results => {res.redirect('/')} )
