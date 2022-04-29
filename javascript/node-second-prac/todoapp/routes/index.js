@@ -13,10 +13,16 @@ client.connect()
 
 /* GET home page. */
 router.get('/', (req, res, next) => {
+  const isAuth = Boolean(req.session.userid);
+  console.log(isAuth);
   client
     .query('SELECT * FROM tasks')
     .then(results => {
-      res.render('index.ejs', { title: 'Unko Zamurai', todos: results.rows })
+      res.render('index.ejs', { 
+	title: 'Unko Zamurai',
+	todos: results.rows,
+        isAuth: isAuth,
+      })
     })
     .catch(error => console.error(error.stack))
 });
@@ -27,8 +33,9 @@ router.post('/', (req, res, next) => {
   })
 
   const todo = req.body.add;
+  const userId = req.session.userid;
   client
-  .query('INSERT INTO tasks (user_id, content) VALUES (1, $1)', [todo])
+  .query('INSERT INTO tasks (user_id, content) VALUES ($1, $2)', [userId, todo])
   .then(results => {res.redirect('/')} )
   .catch(error => console.error(error.stack))
 })

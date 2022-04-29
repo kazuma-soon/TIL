@@ -8,18 +8,15 @@
 </head>
 <body>
   <%- include('./error_messages.ejs') %>
-  
-  <form action="/signup" method="post">
+
+  <form action="/signin" method="post">
     <label>ユーザ名</label>
     <input required type="text" name="username"/>
     <br>
     <label>パスワード</label>
     <input required type="password" name="password"/>
     <br>
-    <label>パスワード再入力</label>
-    <input required type="text" name="repassword"/>
-    <br>
-    <input type="submit" value="Sign up"/>
+    <input type="submit" value="Sign in"/>
   </form>
 </body>
 </html>

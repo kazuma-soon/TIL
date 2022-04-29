@@ -15,9 +15,14 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// to index as the main route
+//authorization
+require('./config/passport.js')(app);
+
+// routes
 app.use('/', require('./routes/index.js'));
 app.use('/signup', require('./routes/signup.js'));
+app.use('/signin', require('./routes/signin.js'));
+app.use('/logout', require('./routes/logout.js'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

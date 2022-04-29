@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const bcrypt = require("bcrypt");
 
 // pg -->
 const { Client } = require('pg')
@@ -22,7 +23,7 @@ router.post('/', (req, res, next) => {
 
   client
     .query('SELECT * FROM users WHERE name = $1', [username])
-    .then(results => {
+    .then(async function(results) {
       if (results.rows.length > 0) { // パスワード使用済の場合
 	res.render('signup.ejs', { 
 	  title: 'SignUp | Unko Zamurai',
@@ -31,14 +32,15 @@ router.post('/', (req, res, next) => {
       } 
       if (results.rows.length === 0) {
 	if (password === repassword) { // 正常な入力の場合
+	  const hashedPassword = await bcrypt.hash(password, 10);
           client
-	    .query('INSERT INTO users (name, password) VALUES ($1, $2)', [username, password])
+	    .query('INSERT INTO users (name, password) VALUES ($1, $2)', [username, hashedPassword])
 	    .then(() => res.redirect('/'))
 	    .catch(err => {
 	      console.error(err)
 	      res.render("signup", {
                 title: "Sign up",
-                errorMessage: [err.sqlMessage],
+                errorMessage: [],
               })
 	    })
         }

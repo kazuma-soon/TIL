@@ -5,17 +5,24 @@
     <link rel='stylesheet' href='/stylesheets/style.css' />
   </head>
   <body>
-    <form action="/" method="post">
-      <label>Add Todos</label>
-      <input required type="text" name="add" placeholder="What to do?">
-      <input type="submit" value="Add!">
-    </form>
+    <%- include('./error_messages.ejs') %>
 
-    <% todos.forEach(todo => { %>
-      <ul>
-        <li><%= todo.content %></li>
-      </ul>
-    <% }) %>
+    <% if (isAuth) { %>
+      <form action="/" method="post">
+        <label>Add Todos</label>
+        <input required type="text" name="add" placeholder="What to do?">
+        <input type="submit" value="Add!">
+      </form>
+
+      <% todos.forEach(todo => { %>
+        <ul>
+          <li><%= todo.content %></li>
+        </ul>
+      <% }) %>
+    <% } else { %>
+      <h1>Welcome to the TodoApp</h1>
+      <a href="/signup">Sign up now!</a> or <a href="/signin">Sign in now?</a>
+      <% } %>
   </body>
 </html>
 
