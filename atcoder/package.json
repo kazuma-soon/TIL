@@ -1,0 +1,20 @@
+{
+  "name": "atcoder",
+  "version": "1.0.0",
+  "description": "- ABC042 - ABC043 - ABC044 - ABC045 - ABC046",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^17.0.33",
+    "tslint": "^6.1.3",
+    "typescript": "^4.6.4"
+  },
+  "dependencies": {
+    "fs": "^0.0.1-security"
+  }
+}
