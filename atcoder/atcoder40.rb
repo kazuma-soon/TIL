@@ -1,0 +1,1 @@
+p gets.chomp.scan(/A.*Z/).map{ |i| i.length }.max
