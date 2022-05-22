@@ -1,4 +1,9 @@
-let a: string = 'a';
-if (a) {
-  console.log(1111);
+const sum = (...args: number[]): number => {
+  let results = 0;
+  for (const num of args) {
+    results += num;
+  }
+  return results;
 }
+
+console.log(sum(1, 2, 3))
