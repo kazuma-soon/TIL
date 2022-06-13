@@ -16,3 +16,7 @@
 - ABC056
 
 **pythonへの切り替え**
+- ABC057 A
+- ABC058 A
+- ABC059 A
+- ABC060 A
