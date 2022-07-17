@@ -4,7 +4,7 @@ import pytest
 
 input_data = [
     ("私の名前は佐藤です。","日本語","英語", "My name is Sato."),
-    ("こんにちは","日本語","英語", "Hello"),
+    ("こんにちは","日本語","英語", "hello"),
     ("おはよう","日本語","英語", "good morning")
 ]
 
@@ -24,4 +24,5 @@ def test_convert(input_a, input_b, input_c, input_d, trans):
     print(f"input_d:{input_d}")
 
     text_translated = trans.convert(input_a, input_b, input_c)
+    print(f'input_data: {input_data}')
     assert text_translated == input_d

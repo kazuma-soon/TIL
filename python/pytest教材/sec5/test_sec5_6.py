@@ -9,5 +9,5 @@ def test_mock_exception(mocker):
         trans = GoogleTranslator()
         text_translated = trans.convert("私の名前は佐藤です。", "日本語", "英語")
         print(text_translated)
-
+    print(e)
     print(e.value.args[0])

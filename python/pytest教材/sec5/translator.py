@@ -5,22 +5,25 @@ class GoogleTranslator():
         self.translator = Translator()
 
     def get_language_id(self, language_name):
-        languages = {
-            '日本語': 'ja',
-            '英語': 'en',
-            '中国語': 'zh-cn',
-            'フランス語': 'fr',
-            'ドイツ語': 'de',
-            'ヒンディー語': 'hi',
-            'イタリア語': 'it',
-            '韓国語': 'ko',
-            'ロシア語': 'ru',
-            'スペイン語': 'es'
-        }
-        return languages[language_name]
+      languages = {
+          '日本語': 'ja',
+          '英語': 'en',
+          '中国語': 'zh-cn',
+          'フランス語': 'fr',
+          'ドイツ語': 'de',
+          'ヒンディー語': 'hi',
+          'イタリア語': 'it',
+          '韓国語': 'ko',
+          'ロシア語': 'ru',
+          'スペイン語': 'es'
+      }
+      return languages[language_name]
 
     def convert(self, text_original, language_original_name, language_translated_name):
+        pass
         language_original_id = self.get_language_id(language_original_name)
+        print(language_original_id)
         language_translated_id = self.get_language_id(language_translated_name)
+        print(language_translated_id)
         text_translated = self.translator.translate(text_original, src=language_original_id, dest=language_translated_id)
         return text_translated.text

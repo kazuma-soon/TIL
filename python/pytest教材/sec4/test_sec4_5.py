@@ -9,7 +9,7 @@ def setup_processing(request):
     request.addfinalizer(teardown_processing)
 
 class TestExample():
-    def test_hello(self, setup_processing):
+    def test_hello(self):
         print("hello")
 
     def test_goodmorning(self):

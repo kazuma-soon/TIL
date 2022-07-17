@@ -1,7 +1,7 @@
 # fixtureを使ってクラスに対する前処理＆後処理
 import pytest
 
-@pytest.fixture(scope='')
+@pytest.fixture(scope='function')
 def start(request):
     print('fixture-start')
     

@@ -14,13 +14,13 @@ def test_japanese_to_english(trans, mocker):
             return "ja"
         else:
             return "fr"
-    mock_obj = mocker.patch("translator.GoogleTranslator.get_language_id")
-    mock_obj.side_effect = param_select
-
+    mock_obj = mocker.patch("translator.GoogleTranslator.get_language_id", side_effect=param_select)
+    
     text_translated = trans.convert("私の名前は佐藤です。", "日本語", "英語")
     print(text_translated)
 
     mock_args = mock_obj.call_args_list
+    print(mock_obj)
     print(mock_args)
-    # assert mock_args[0][0][0] == "日本語"
-    # assert mock_args[1][0][0] == "英語"
+    assert mock_args[0][0][0] == "日本語"
+    assert mock_args[1][0][0] == "英語"
