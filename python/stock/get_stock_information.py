@@ -3,10 +3,10 @@ import datetime as dt
 import pandas_datareader.data as web
  
 #銘柄コード入力(7177はGMO-APです。)
-ticker_symbol_1 = "7177"
+ticker_symbol_1 = "^NIKKEI"
 ticker_symbol_dr_1 = ticker_symbol_1 + ".T"
 
-ticker_symbol_2 = "7177"
+ticker_symbol_2 = "^GSPC"
 ticker_symbol_dr_2 = ticker_symbol_2 + ".T"
 
 #2022-01-01以降の株価取得
