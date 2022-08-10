@@ -1,0 +1,235 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/kazuma-soon/TIL/blob/main/dgl_01\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import dgl\n",
+        "import torch\n",
+        "import torch.nn as nn\n",
+        "import torch.nn.functional as F"
+      ],
+      "metadata": {
+        "id": "_XwBxKOZXNJP"
+      },
+      "execution_count": 31,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "g = dataset[0]\n",
+        "\n",
+        "print(dataset.num_classes)\n",
+        "print(g.ndata['feat'].shape)\n",
+        "print(g.ndata[\"label\"])"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "Mk1KSSzdYI8f",
+        "outputId": "ad2c569b-02d8-49cc-820b-d5873ec30e89"
+      },
+      "execution_count": 30,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "7\n",
+            "torch.Size([2708, 1433])\n",
+            "tensor([3, 4, 4,  ..., 3, 3, 3])\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from dgl.nn import GraphConv\n",
+        "\n",
+        "class GCN(nn.Module):\n",
+        "    def __init__(self, in_feats, h_feats, num_classes):\n",
+        "        super(GCN, self).__init__()\n",
+        "        self.conv1 = GraphConv(in_feats, h_feats)\n",
+        "        self.conv2 = GraphConv(h_feats, num_classes)\n",
+        "\n",
+        "    def forward(self, g, in_feat):\n",
+        "        h = self.conv1(g, in_feat)\n",
+        "        h = F.relu(h)\n",
+        "        h = self.conv2(g, h)\n",
+        "        return h\n",
+        "\n",
+        "# Create the model with given dimensions\n",
+        "# g.ndata['feat'].shape[1] = 2708 -> ノードの特徴\n",
+        "# 16 -> １レイヤーの出力, 2レイヤーの入力\n",
+        "# dataset.num_classes = 7 -> カテゴリー数\n",
+        "model = GCN(g.ndata['feat'].shape[1], 16, dataset.num_classes)"
+      ],
+      "metadata": {
+        "id": "nSIvP0XfYwin"
+      },
+      "execution_count": 32,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        ""
+      ],
+      "metadata": {
+        "id": "8q3O2UTkdW0N"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "model"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "OJ3KHFp1b6tz",
+        "outputId": "eb50ffe6-8231-4e62-c45f-ad09c490f959"
+      },
+      "execution_count": 20,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "GCN(\n",
+              "  (conv1): GraphConv(in=1433, out=16, normalization=both, activation=None)\n",
+              "  (conv2): GraphConv(in=16, out=7, normalization=both, activation=None)\n",
+              ")"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 20
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def train(g, model):\n",
+        "    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)\n",
+        "    best_val_acc = 0\n",
+        "    best_test_acc = 0\n",
+        "\n",
+        "    features = g.ndata['feat']\n",
+        "    labels = g.ndata['label']\n",
+        "    train_mask = g.ndata['train_mask']\n",
+        "    val_mask = g.ndata['val_mask']\n",
+        "    test_mask = g.ndata['test_mask']\n",
+        "    for e in range(100):\n",
+        "        # Forward\n",
+        "        logits = model(g, features)\n",
+        "\n",
+        "        # Compute prediction\n",
+        "        pred = logits.argmax(1)\n",
+        "\n",
+        "        # Compute loss\n",
+        "        # Note that you should only compute the losses of the nodes in the training set.\n",
+        "        loss = F.cross_entropy(logits[train_mask], labels[train_mask])\n",
+        "\n",
+        "        # Compute accuracy on training/validation/test\n",
+        "        train_acc = (pred[train_mask] == labels[train_mask]).float().mean()\n",
+        "        val_acc = (pred[val_mask] == labels[val_mask]).float().mean()\n",
+        "        test_acc = (pred[test_mask] == labels[test_mask]).float().mean()\n",
+        "\n",
+        "        # Save the best validation accuracy and the corresponding test accuracy.\n",
+        "        if best_val_acc < val_acc:\n",
+        "            best_val_acc = val_acc\n",
+        "            best_test_acc = test_acc\n",
+        "\n",
+        "        # Backward\n",
+        "        optimizer.zero_grad()\n",
+        "        loss.backward()\n",
+        "        optimizer.step()\n",
+        "\n",
+        "        if e % 5 == 0:\n",
+        "            print('In epoch {}, loss: {:.3f}, val acc: {:.3f} (best {:.3f}), test acc: {:.3f} (best {:.3f})'.format(\n",
+        "                e, loss, val_acc, best_val_acc, test_acc, best_test_acc))\n",
+        "model = GCN(g.ndata['feat'].shape[1], 16, dataset.num_classes)\n",
+        "train(g, model)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "sZsl8GbCcAcZ",
+        "outputId": "8f50f02e-f51d-445b-8501-e3418b145250"
+      },
+      "execution_count": 23,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "In epoch 0, loss: 1.946, val acc: 0.162 (best 0.162), test acc: 0.174 (best 0.174)\n",
+            "In epoch 5, loss: 1.894, val acc: 0.528 (best 0.602), test acc: 0.546 (best 0.570)\n",
+            "In epoch 10, loss: 1.816, val acc: 0.594 (best 0.602), test acc: 0.600 (best 0.570)\n",
+            "In epoch 15, loss: 1.713, val acc: 0.682 (best 0.682), test acc: 0.663 (best 0.663)\n",
+            "In epoch 20, loss: 1.587, val acc: 0.712 (best 0.712), test acc: 0.675 (best 0.675)\n",
+            "In epoch 25, loss: 1.442, val acc: 0.696 (best 0.712), test acc: 0.694 (best 0.675)\n",
+            "In epoch 30, loss: 1.281, val acc: 0.690 (best 0.712), test acc: 0.694 (best 0.675)\n",
+            "In epoch 35, loss: 1.114, val acc: 0.690 (best 0.712), test acc: 0.694 (best 0.675)\n",
+            "In epoch 40, loss: 0.949, val acc: 0.698 (best 0.712), test acc: 0.701 (best 0.675)\n",
+            "In epoch 45, loss: 0.795, val acc: 0.704 (best 0.712), test acc: 0.705 (best 0.675)\n",
+            "In epoch 50, loss: 0.656, val acc: 0.712 (best 0.714), test acc: 0.715 (best 0.713)\n",
+            "In epoch 55, loss: 0.537, val acc: 0.718 (best 0.718), test acc: 0.724 (best 0.724)\n",
+            "In epoch 60, loss: 0.436, val acc: 0.736 (best 0.736), test acc: 0.737 (best 0.737)\n",
+            "In epoch 65, loss: 0.354, val acc: 0.746 (best 0.746), test acc: 0.746 (best 0.746)\n",
+            "In epoch 70, loss: 0.288, val acc: 0.758 (best 0.758), test acc: 0.754 (best 0.754)\n",
+            "In epoch 75, loss: 0.235, val acc: 0.770 (best 0.770), test acc: 0.760 (best 0.760)\n",
+            "In epoch 80, loss: 0.194, val acc: 0.772 (best 0.772), test acc: 0.764 (best 0.763)\n",
+            "In epoch 85, loss: 0.161, val acc: 0.780 (best 0.780), test acc: 0.768 (best 0.768)\n",
+            "In epoch 90, loss: 0.135, val acc: 0.774 (best 0.780), test acc: 0.767 (best 0.768)\n",
+            "In epoch 95, loss: 0.115, val acc: 0.772 (best 0.780), test acc: 0.767 (best 0.768)\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        ""
+      ],
+      "metadata": {
+        "id": "QpnFom_ucc8J"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ],
+  "metadata": {
+    "colab": {
+      "collapsed_sections": [],
+      "name": "Colaboratory へようこそ",
+      "provenance": [],
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "display_name": "Python 3",
+      "name": "python3"
+    },
+    "accelerator": "GPU",
+    "gpuClass": "standard"
+  },
+  "nbformat": 4,
+  "nbformat_minor": 0
+}
